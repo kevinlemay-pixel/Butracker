@@ -3,29 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>My Bus Dashboard</title>
+    <title>My Bus Tracker</title>
     <style>
-        body { background: #000; color: #fff; font-family: -apple-system, sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
-        .container { display: flex; flex-direction: column; height: 100vh; }
-        .pane { flex: 1; border: none; position: relative; border-bottom: 2px solid #333; }
-        .label { position: absolute; top: 10px; left: 10px; background: rgba(0, 114, 188, 0.9); padding: 5px 12px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; z-index: 10; }
-        iframe { width: 100%; height: 100%; border: none; }
-        .refresh-bar { height: 50px; background: #1c1c1e; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #0a84ff; cursor: pointer; }
+        :root { --stm-blue: #0072bc; --stm-green: #30d158; --bg: #000; }
+        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        h1 { font-size: 1.2rem; color: #888; margin-bottom: 30px; letter-spacing: 1px; }
+        
+        .nav-button {
+            width: 100%;
+            max-width: 350px;
+            padding: 30px 20px;
+            margin-bottom: 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #333;
+            transition: transform 0.2s;
+        }
+        .nav-button:active { transform: scale(0.98); background: #1c1c1e; }
+        
+        .morning { border-left: 8px solid var(--stm-blue); background: #111; }
+        .return { border-left: 8px solid var(--stm-green); background: #111; }
+        
+        .btn-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; }
+        .btn-sub { font-size: 0.9rem; color: #aaa; }
+        .icon { font-size: 2rem; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="pane">
-            <div class="label">TO METRO (53344)</div>
-            <iframe id="frame1" src="https://www.stm.info/en/info/networks/bus/local/line-187-east/53344"></iframe>
-        </div>
 
-        <div class="pane">
-            <div class="label">TO HOME (53724)</div>
-            <iframe id="frame2" src="https://www.stm.info/en/info/networks/bus/local/line-187-west/53724"></iframe>
-        </div>
+    <h1>MY COMMUTE</h1>
 
-        <div class="refresh-bar" onclick="location.reload()">REFRESH ALL TIMES</div>
-    </div>
+    <a href="https://www.stm.info/en/info/networks/bus/local/line-187-east/53344" class="nav-button morning">
+        <span class="icon">🚇</span>
+        <span class="btn-title">TO METRO</span>
+        <span class="btn-sub">Stop 53344 (186/187)</span>
+    </a>
+
+    <a href="https://www.stm.info/en/info/networks/bus/local/line-187-west/53724" class="nav-button return">
+        <span class="icon">🏠</span>
+        <span class="btn-title">TO HOME</span>
+        <span class="btn-sub">Stop 53724 (186/187/487)</span>
+    </a>
+
+    <p style="color: #444; font-size: 0.8rem; margin-top: 20px;">Direct STM Real-Time Links</p>
+
 </body>
 </html>
