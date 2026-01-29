@@ -35,7 +35,6 @@
         
         function getTargetStop() {
             const hour = new Date().getHours();
-            // Morning: Heading to Honoré-Beaugrand | Afternoon: Heading to Sherbrooke/Fletcher
             return (hour < 12) ? 
                 { id: '53344', dest: 'Honoré-Beaugrand', lines: ['186', '187'] } : 
                 { id: '53724', dest: 'Sherbrooke / Fletcher', lines: ['186', '187', '487'] };
@@ -44,8 +43,9 @@
         async function updateData() {
             const stop = getTargetStop();
             document.getElementById('stop-label').innerText = stop.dest;
-            
-            // AllOrigins Proxy setup
+            document.getElementById('last-update').innerText = "Updating...";
+
+            // AllOrigins Proxy wraps the data in a "contents" field
             const stmUrl = `https://api.stm.info/pub/od/gtfs-rt/ic/v2/stopArrivals/${stop.id}`;
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(stmUrl)}`;
 
@@ -54,18 +54,15 @@
                     headers: { 'apiKey': API_KEY }
                 });
                 
-                if (!response.ok) throw new Error("Proxy Error");
-                
                 const json = await response.json();
-                // AllOrigins wraps the API response in a "contents" string
-                const data = JSON.parse(json.contents);
+                // THIS IS THE FIX: We must parse the "contents" string
+                const data = JSON.parse(json.contents); 
                 
                 const arrivals = data.arrivals.filter(a => stop.lines.includes(a.route_id));
                 
                 if (arrivals && arrivals.length > 0) {
-                    const next = arrivals[0];
-                    document.getElementById('time').innerText = next.minutesAway;
-                    document.getElementById('bus-num').innerText = "Line " + next.route_id;
+                    document.getElementById('time').innerText = arrivals[0].minutesAway;
+                    document.getElementById('bus-num').innerText = "Line " + arrivals[0].route_id;
                     document.getElementById('unit-label').innerText = "MINS AWAY";
                 } else {
                     document.getElementById('time').innerText = "OFF";
@@ -82,7 +79,7 @@
         }
 
         updateData();
-        setInterval(updateData, 30000); // Auto-refresh every 30s
+        setInterval(updateData, 30000); 
     </script>
 </body>
 </html>
