@@ -7,12 +7,12 @@
     <style>
         :root { --stm-blue: #0072bc; --stm-green: #30d158; --bg: #000; }
         body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        h1 { font-size: 1.2rem; color: #888; margin-bottom: 30px; letter-spacing: 1px; }
+        h1 { font-size: 1.1rem; color: #666; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; }
         
         .nav-button {
             width: 100%;
             max-width: 350px;
-            padding: 30px 20px;
+            padding: 25px 20px;
             margin-bottom: 20px;
             border-radius: 20px;
             text-decoration: none;
@@ -21,35 +21,35 @@
             flex-direction: column;
             align-items: center;
             border: 1px solid #333;
-            transition: transform 0.2s;
+            transition: transform 0.1s;
         }
-        .nav-button:active { transform: scale(0.98); background: #1c1c1e; }
+        .nav-button:active { transform: scale(0.96); background: #222; }
         
-        .morning { border-left: 8px solid var(--stm-blue); background: #111; }
-        .return { border-left: 8px solid var(--stm-green); background: #111; }
+        .morning { border-left: 10px solid var(--stm-blue); background: #111; }
+        .return { border-left: 10px solid var(--stm-green); background: #111; }
         
         .btn-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; }
-        .btn-sub { font-size: 0.9rem; color: #aaa; }
-        .icon { font-size: 2rem; margin-bottom: 10px; }
+        .btn-sub { font-size: 0.85rem; color: #888; text-align: center; }
+        .icon { font-size: 1.8rem; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <h1>MY COMMUTE</h1>
+    <h1>Sherbrooke / Fletcher</h1>
 
-    <a href="https://www.stm.info/en/info/networks/bus/local/line-187-east/53344" class="nav-button morning">
+    <a href="https://www.stm.info/en/info/networks/bus/local/line-187-west/53345" class="nav-button morning">
         <span class="icon">🚇</span>
         <span class="btn-title">TO METRO</span>
-        <span class="btn-sub">Stop 53344 (186/187)</span>
+        <span class="btn-sub">Stop 53345 (Westbound)</span>
     </a>
 
-    <a href="https://www.stm.info/en/info/networks/bus/local/line-187-west/53724" class="nav-button return">
+    <a href="https://www.stm.info/en/info/networks/bus/local/line-187-east/53724" class="nav-button return">
         <span class="icon">🏠</span>
         <span class="btn-title">TO HOME</span>
-        <span class="btn-sub">Stop 53724 (186/187/487)</span>
+        <span class="btn-sub">Stop 53724 (Eastbound)</span>
     </a>
 
-    <p style="color: #444; font-size: 0.8rem; margin-top: 20px;">Direct STM Real-Time Links</p>
+    <p style="color: #333; font-size: 0.7rem; margin-top: 20px;">v1.2 • Reliable Mode</p>
 
 </body>
 </html>
