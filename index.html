@@ -31,10 +31,13 @@
     <div class="status" id="last-update">Updating...</div>
 
     <script>
+        // Your verified STM API Key
         const API_KEY = "l7f3b0cc56068c4d43aba9832d89ac833f";
         
         function getTargetStop() {
             const hour = new Date().getHours();
+            // Morning (<12 PM): Stop 53344 (Honoré-Beaugrand)
+            // Afternoon (>=12 PM): Stop 53724 (Sherbrooke / Fletcher)
             return (hour < 12) ? 
                 { id: '53344', dest: 'Honoré-Beaugrand', lines: ['186', '187'] } : 
                 { id: '53724', dest: 'Sherbrooke / Fletcher', lines: ['186', '187', '487'] };
@@ -45,7 +48,6 @@
             document.getElementById('stop-label').innerText = stop.dest;
             document.getElementById('last-update').innerText = "Updating...";
 
-            // AllOrigins Proxy wraps the data in a "contents" field
             const stmUrl = `https://api.stm.info/pub/od/gtfs-rt/ic/v2/stopArrivals/${stop.id}`;
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(stmUrl)}`;
 
@@ -55,14 +57,16 @@
                 });
                 
                 const json = await response.json();
-                // THIS IS THE FIX: We must parse the "contents" string
+                
+                // CRITICAL FIX: Parsing the wrapped contents field from AllOrigins
                 const data = JSON.parse(json.contents); 
                 
                 const arrivals = data.arrivals.filter(a => stop.lines.includes(a.route_id));
                 
                 if (arrivals && arrivals.length > 0) {
-                    document.getElementById('time').innerText = arrivals[0].minutesAway;
-                    document.getElementById('bus-num').innerText = "Line " + arrivals[0].route_id;
+                    const next = arrivals[0];
+                    document.getElementById('time').innerText = next.minutesAway;
+                    document.getElementById('bus-num').innerText = "Line " + next.route_id;
                     document.getElementById('unit-label').innerText = "MINS AWAY";
                 } else {
                     document.getElementById('time').innerText = "OFF";
@@ -78,7 +82,9 @@
             }
         }
 
+        // Initial load
         updateData();
+        // Auto-refresh every 30 seconds
         setInterval(updateData, 30000); 
     </script>
 </body>
