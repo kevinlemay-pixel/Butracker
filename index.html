@@ -31,13 +31,11 @@
     <div class="status" id="last-update">Updating...</div>
 
     <script>
-        // Your verified STM API Key
         const API_KEY = "l7f3b0cc56068c4d43aba9832d89ac833f";
         
         function getTargetStop() {
             const hour = new Date().getHours();
-            // Morning (<12 PM): Stop 53344 (Honoré-Beaugrand)
-            // Afternoon (>=12 PM): Stop 53724 (Sherbrooke / Fletcher)
+            // Morning: Stop 53344 (HB) | Afternoon: Stop 53724 (Sherbrooke/Fletcher)
             return (hour < 12) ? 
                 { id: '53344', dest: 'Honoré-Beaugrand', lines: ['186', '187'] } : 
                 { id: '53724', dest: 'Sherbrooke / Fletcher', lines: ['186', '187', '487'] };
@@ -58,15 +56,14 @@
                 
                 const json = await response.json();
                 
-                // CRITICAL FIX: Parsing the wrapped contents field from AllOrigins
+                // THE FIX: AllOrigins wraps data in a string. We must parse it.
                 const data = JSON.parse(json.contents); 
                 
                 const arrivals = data.arrivals.filter(a => stop.lines.includes(a.route_id));
                 
                 if (arrivals && arrivals.length > 0) {
-                    const next = arrivals[0];
-                    document.getElementById('time').innerText = next.minutesAway;
-                    document.getElementById('bus-num').innerText = "Line " + next.route_id;
+                    document.getElementById('time').innerText = arrivals[0].minutesAway;
+                    document.getElementById('bus-num').innerText = "Line " + arrivals[0].route_id;
                     document.getElementById('unit-label').innerText = "MINS AWAY";
                 } else {
                     document.getElementById('time').innerText = "OFF";
@@ -76,15 +73,13 @@
                 
                 document.getElementById('last-update').innerText = "Last updated: " + new Date().toLocaleTimeString();
             } catch (err) {
-                console.error("Fetch Error:", err);
+                console.error(err);
                 document.getElementById('time').innerText = "!";
-                document.getElementById('bus-num').innerText = "Check API/Internet";
+                document.getElementById('bus-num').innerText = "API Key or Server Error";
             }
         }
 
-        // Initial load
         updateData();
-        // Auto-refresh every 30 seconds
         setInterval(updateData, 30000); 
     </script>
 </body>
