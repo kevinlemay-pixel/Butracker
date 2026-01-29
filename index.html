@@ -35,7 +35,8 @@
         
         function getTargetStop() {
             const hour = new Date().getHours();
-            // Morning: Stop 53344 (HB) | Afternoon: Stop 53724 (Sherbrooke/Fletcher)
+            // Morning: Stop 53344 (Honoré-Beaugrand)
+            // Afternoon: Stop 53724 (Sherbrooke / Fletcher)
             return (hour < 12) ? 
                 { id: '53344', dest: 'Honoré-Beaugrand', lines: ['186', '187'] } : 
                 { id: '53724', dest: 'Sherbrooke / Fletcher', lines: ['186', '187', '487'] };
@@ -46,17 +47,15 @@
             document.getElementById('stop-label').innerText = stop.dest;
             document.getElementById('last-update').innerText = "Updating...";
 
+            // Using AllOrigins proxy to bypass browser security blocks
             const stmUrl = `https://api.stm.info/pub/od/gtfs-rt/ic/v2/stopArrivals/${stop.id}`;
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(stmUrl)}`;
 
             try {
-                const response = await fetch(proxyUrl, {
-                    headers: { 'apiKey': API_KEY }
-                });
-                
+                const response = await fetch(proxyUrl, { headers: { 'apiKey': API_KEY } });
                 const json = await response.json();
                 
-                // THE FIX: AllOrigins wraps data in a string. We must parse it.
+                // UNWRAP DATA: AllOrigins puts the result in 'contents'
                 const data = JSON.parse(json.contents); 
                 
                 const arrivals = data.arrivals.filter(a => stop.lines.includes(a.route_id));
@@ -68,14 +67,13 @@
                 } else {
                     document.getElementById('time').innerText = "OFF";
                     document.getElementById('bus-num').innerText = "No Bus Scheduled";
-                    document.getElementById('unit-label').innerText = "CHECK CHRONO";
                 }
                 
                 document.getElementById('last-update').innerText = "Last updated: " + new Date().toLocaleTimeString();
             } catch (err) {
                 console.error(err);
                 document.getElementById('time').innerText = "!";
-                document.getElementById('bus-num').innerText = "API Key or Server Error";
+                document.getElementById('bus-num').innerText = "API or Server Error";
             }
         }
 
