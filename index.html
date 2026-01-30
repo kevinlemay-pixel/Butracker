@@ -3,53 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>My Bus Tracker</title>
+    <title>My STM Tracker</title>
     <style>
-        :root { --stm-blue: #0072bc; --stm-green: #30d158; --bg: #000; }
-        body { background: var(--bg); color: white; font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        h1 { font-size: 1.1rem; color: #666; margin-bottom: 30px; letter-spacing: 2px; text-transform: uppercase; }
-        
-        .nav-button {
-            width: 100%;
-            max-width: 350px;
-            padding: 25px 20px;
-            margin-bottom: 20px;
-            border-radius: 20px;
-            text-decoration: none;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border: 1px solid #333;
-            transition: transform 0.1s;
-        }
-        .nav-button:active { transform: scale(0.96); background: #222; }
-        
-        .morning { border-left: 10px solid var(--stm-blue); background: #111; }
-        .return { border-left: 10px solid var(--stm-green); background: #111; }
-        
-        .btn-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; }
-        .btn-sub { font-size: 0.85rem; color: #888; text-align: center; }
-        .icon { font-size: 1.8rem; margin-bottom: 10px; }
+        :root { --bg: #000; --card: #1c1c1e; --text: #fff; --accent: #0a84ff; --go: #30d158; }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; justify-content: center; margin: 0; }
+        .header { font-size: 1rem; color: #8e8e93; text-transform: uppercase; letter-spacing: 1px; }
+        .stop-name { font-size: 1.5rem; font-weight: 800; margin: 10px 0 25px 0; text-align: center; }
+        .main-timer { background: var(--card); width: 100%; max-width: 350px; padding: 40px 20px; border-radius: 25px; text-align: center; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); box-sizing: border-box; }
+        .minutes { font-size: 6rem; font-weight: 900; color: var(--go); line-height: 1; margin-bottom: 5px; }
+        .bus-badge { background: var(--accent); padding: 6px 15px; border-radius: 10px; font-size: 1.4rem; font-weight: bold; display: inline-block; margin-top: 15px; }
+        .btn { margin-top: 30px; background: #2c2c2e; color: var(--accent); border: none; padding: 15px; border-radius: 15px; width: 100%; max-width: 350px; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        .status { margin-top: 15px; font-size: 0.8rem; color: #555; }
     </style>
 </head>
 <body>
 
-    <h1>Sherbrooke / Fletcher</h1>
+    <div class="header">HEADING TO</div>
+    <div class="stop-name" id="stop-label">---</div>
 
-    <a href="https://www.stm.info/en/info/networks/bus/local/line-187-west/53345" class="nav-button morning">
-        <span class="icon">🚇</span>
-        <span class="btn-title">TO METRO</span>
-        <span class="btn-sub">Stop 53345 (Westbound)</span>
-    </a>
+    <div class="main-timer">
+        <div class="minutes" id="time">--</div>
+        <div id="unit-label" style="font-size: 1rem; color: #888; font-weight: bold;">MINS AWAY</div>
+        <div class="bus-badge" id="bus-num">Line --</div>
+    </div>
 
-    <a href="https://www.stm.info/en/info/networks/bus/local/line-187-east/53724" class="nav-button return">
-        <span class="icon">🏠</span>
-        <span class="btn-title">TO HOME</span>
-        <span class="btn-sub">Stop 53724 (Eastbound)</span>
-    </a>
+    <button class="btn" onclick="updateData()">REFRESH LIVE DATA</button>
+    <div class="status" id="last-update">Updating...</div>
 
-    <p style="color: #333; font-size: 0.7rem; margin-top: 20px;">v1.2 • Reliable Mode</p>
+    <script>
+        const API_KEY = "l7f3b0cc56068c4d43aba9832d89ac833f";
+        
+        function getTargetStop() {
+            const hour = new Date().getHours();
+            // Morning: Stop 53344 (Honoré-Beaugrand)
+            // Afternoon: Stop 53724 (Sherbrooke / Fletcher)
+            return (hour < 12) ? 
+                { id: '53345', dest: 'Honoré-Beaugrand', lines: ['186', '187'] } : 
+                { id: '53724', dest: 'Sherbrooke / Fletcher', lines: ['186', '187', '487'] };
+        }
 
+        async function updateData() {
+            const stop = getTargetStop();
+            document.getElementById('stop-label').innerText = stop.dest;
+            document.getElementById('last-update').innerText = "Updating...";
+
+            // Using AllOrigins proxy to bypass browser security blocks
+            const stmUrl = `https://api.stm.info/pub/od/gtfs-rt/ic/v2/stopArrivals/${stop.id}`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(stmUrl)}`;
+
+            try {
+                const response = await fetch(proxyUrl, { headers: { 'apiKey': API_KEY } });
+                const json = await response.json();
+                
+                // UNWRAP DATA: AllOrigins puts the result in 'contents'
+                const data = JSON.parse(json.contents); 
+                
+                const arrivals = data.arrivals.filter(a => stop.lines.includes(a.route_id));
+                
+                if (arrivals && arrivals.length > 0) {
+                    document.getElementById('time').innerText = arrivals[0].minutesAway;
+                    document.getElementById('bus-num').innerText = "Line " + arrivals[0].route_id;
+                    document.getElementById('unit-label').innerText = "MINS AWAY";
+                } else {
+                    document.getElementById('time').innerText = "OFF";
+                    document.getElementById('bus-num').innerText = "No Bus Scheduled";
+                }
+                
+                document.getElementById('last-update').innerText = "Last updated: " + new Date().toLocaleTimeString();
+            } catch (err) {
+                console.error(err);
+                document.getElementById('time').innerText = "!";
+                document.getElementById('bus-num').innerText = "API or Server Error";
+            }
+        }
+
+        updateData();
+        setInterval(updateData, 30000); 
+    </script>
 </body>
 </html>
